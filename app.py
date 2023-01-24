@@ -26,11 +26,16 @@ def predict_result(img):
     """predicts the result"""
     return np.argmax(model.predict(img)[0])
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder="templates")
 
 @app.route('/oct', methods=['GET'])
 def oct():
-    return "<img src='https://storage.googleapis.com/kaggle-datasets-images/17839/23376/185119dd679b0a18c1ea8f682f51d54c/dataset-cover.jpg?t=2018-03-24-19-55-00'</img><p>Hello</p>"
+    return render_template("predict.html")
+
+@app.route('/show_prediction')
+def show_prediction():
+    pred_value = 10
+    return render_template("predict.html", pred_value=pred_value)
 
 @app.route('/predict', methods=['POST'])
 def infer_image():
