@@ -1,34 +1,16 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# import librairie
-
-# In[1]:
-
-
-
 import io
 
 import numpy as np
 import tensorflow as tf
 from PIL import Image
-from flask import Flask, request
+from flask import Flask, request, render_template
 import logging
 logging.basicConfig(level=logging.DEBUG)
 
-
-# load model 
-
-# In[2]:
-
-
 model = tf.keras.models.load_model('model/retinal-oct.h5')
-
-
-# prepare images 
-
-# In[3]:
-
 
 def prepare_image(img):
     """
@@ -40,30 +22,15 @@ def prepare_image(img):
     img = np.expand_dims(img, 0)
     return img
 
-
-# prediction
-
-# In[4]:
-
-
 def predict_result(img):
     """predicts the result"""
     return np.argmax(model.predict(img)[0])
 
-
-# initialize flask object
-
-# In[5]:
-
-
 app = Flask(__name__)
 
-
-# setting up routes and their functions
-
-# In[6]:
-
-
+@app.route('/oct', methods=['GET'])
+def oct():
+    return "<img src='https://storage.googleapis.com/kaggle-datasets-images/17839/23376/185119dd679b0a18c1ea8f682f51d54c/dataset-cover.jpg?t=2018-03-24-19-55-00'</img><p>Hello</p>"
 
 @app.route('/predict', methods=['POST'])
 def infer_image():
@@ -92,19 +59,5 @@ def infer_image():
 def index():
     return 'Retinal OCT prediction API'
 
-
-# run the API
-
-# In[ ]:
-
-
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', use_reloader=False)
-    
-
-
-# In[ ]:
-
-
-
-
