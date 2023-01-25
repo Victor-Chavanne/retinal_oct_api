@@ -7,16 +7,20 @@ import numpy as np
 import tensorflow as tf
 from PIL import Image
 from flask import Flask, request, render_template
+from werkzeug.utils import secure_filename
 import logging
 logging.basicConfig(level=logging.DEBUG)
 
 model = tf.keras.models.load_model('model/retinal-oct.h5')
 
-def prepare_image(img):
+def prepare_image(img, from_api=True):
     """
     prepares the image for the api call
     """
-    img = Image.open(io.BytesIO(img)).convert('RGB')
+    if from_api:
+        img = Image.open(io.BytesIO(img)).convert('RGB')
+    else:
+        img = Image.open(img).convert('RGB')
     img = img.resize((150, 150))
     img = np.array(img)
     img = np.expand_dims(img, 0)
@@ -32,10 +36,14 @@ app = Flask(__name__, template_folder="templates")
 def oct():
     return render_template("predict.html")
 
-@app.route('/show_prediction')
+@app.route('/show_prediction', methods=["GET", "POST"])
 def show_prediction():
-    pred_value = 10
-    return render_template("predict.html", pred_value=pred_value)
+    image = request.files.get("image_import")
+    image = prepare_image(image, from_api=False)
+    pred = predict_result(image)
+    labels = ["CNV", "DME", "DRUSEN", "NORMAL"]
+    pred = labels[pred]
+    return render_template("predict.html", pred=str(pred))
 
 @app.route('/predict', methods=['POST'])
 def infer_image():
